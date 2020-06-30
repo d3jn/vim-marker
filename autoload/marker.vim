@@ -28,3 +28,21 @@ function! s:GotoFirstOccurrenceOf(pattern)
 
     return line_number
 endfunction
+
+function! s:ReadMarkersForFiletype(filetype)
+    let markers = []
+    let markers_file = g:marker_dir.'/'.a:filetype
+    if filereadable(markers_file)
+        let lines = readfile(markers_file)
+
+        for line in lines
+            let matches = matchlist(line, '^\([^ ]\+\) \(.\+\)$')
+
+            if (matches[1] != '') && (matches[2] != '')
+                markers = add(markers, {'mark': matches[1], 'pattern': matches[2]})
+            endif
+        endfor
+    endif
+
+    return markers
+endfunction

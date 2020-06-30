@@ -7,3 +7,7 @@ if exists('g:marker_loaded')
     finish
 endif
 let g:marker_loaded = 1
+
+if !exists('g:marker_dir')
+    let g:marker_dir = fnamemodify($MYVIMRC, ':p:h').'/markers'
+endif
