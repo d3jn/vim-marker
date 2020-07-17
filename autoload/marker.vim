@@ -10,12 +10,26 @@ function! marker#MarkFirstOccurrenceOf(pattern, mark, preserve_position)
 
     let line_number = s:GotoFirstOccurrenceOf(a:pattern)
     if line_number > 0
-        execute "normal m".a:mark
+        execute "normal! m".a:mark
     endif
 
     if a:preserve_position
         call winrestview(view)
     endif
+endfunction
+
+function! marker#MarkAuto()
+    call marker#MarkByFiletype(&filetype)
+endfunction
+
+function! marker#MarkByFiletype(filetype)
+    let markers = s:ReadMarkersForFiletype(a:filetype)
+
+    let view = winsaveview()
+    for marker in markers
+        call marker#MarkFirstOccurrenceOf(marker.pattern, marker.mark, 0)
+    endfor
+    call winrestview(view)
 endfunction
 
 function! s:GotoFirstOccurrenceOf(pattern)
@@ -31,15 +45,16 @@ endfunction
 
 function! s:ReadMarkersForFiletype(filetype)
     let markers = []
-    let markers_file = g:marker_dir.'/'.a:filetype
+    let markers_file = g:markers_dir.'/'.a:filetype.'.markers'
+    echo markers_file
     if filereadable(markers_file)
         let lines = readfile(markers_file)
 
         for line in lines
             let matches = matchlist(line, '^\([^ ]\+\) \(.\+\)$')
 
-            if (matches[1] != '') && (matches[2] != '')
-                markers = add(markers, {'mark': matches[1], 'pattern': matches[2]})
+            if ((matches[1] != '') && (matches[2] != ''))
+                let markers = add(markers, {'mark': matches[1], 'pattern': matches[2]})
             endif
         endfor
     endif
